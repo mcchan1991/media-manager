@@ -167,8 +167,9 @@ class MediaManager extends Extension
             'index'      => route('media-index'),
             'move'       => route('media-move'),
             'delete'     => route('media-delete'),
+            'refresh'     => route('media-refresh'),
             'upload'     => route('media-upload'),
-            'new-folder' => route('media-new-folder'),
+            'new_folder' => route('media-new-folder'),
         ];
     }
 

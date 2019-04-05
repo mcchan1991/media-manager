@@ -9,6 +9,11 @@ use Illuminate\Routing\Controller;
 
 class MediaController extends Controller
 {
+    public function __construct()
+    {
+        Admin::disablePjax();
+    }
+
     public function index(Request $request)
     {
         return Admin::content(function (Content $content) use ($request) {
@@ -73,6 +78,20 @@ class MediaController extends Controller
                 'message' => $e->getMessage(),
             ]);
         }
+    }
+
+    public function refresh(Request $request)
+    {
+        $path = $request->get('path', '/');
+        $view = $request->get('view', 'table');
+
+        $manager = new MediaManager($path);
+
+        return json_encode([
+            'exists' => $manager->exists(),
+            'list'   => $manager->ls(),
+            'nav'    => $manager->navigation()
+        ]);
     }
 
     public function move(Request $request)

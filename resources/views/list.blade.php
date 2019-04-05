@@ -169,7 +169,7 @@ $(function () {
 
         $.ajax({
             method: 'POST',
-            url: '{{ $url['new-folder'] }}',
+            url: '{{ $url['new_folder'] }}',
             data: formData,
             async: false,
             success: function (data) {

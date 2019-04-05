@@ -39,235 +39,19 @@
 
 </style>
 
-<script data-exec-on-popstate>
 
-$(function () {
-    $('.file-delete').click(function () {
-
-        var path = $(this).data('path');
-
-        swal({
-            title: "{{ trans('admin.delete_confirm') }}",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: "{{ trans('admin.confirm') }}",
-            showLoaderOnConfirm: true,
-            closeOnConfirm: false,
-            cancelButtonText: "{{ trans('admin.cancel') }}",
-            preConfirm: function() {
-                return new Promise(function(resolve) {
-
-                    $.ajax({
-                        method: 'delete',
-                        url: '{{ $url['delete'] }}',
-                        data: {
-                            'files[]':[path],
-                            _token:LA.token
-                        },
-                        success: function (data) {
-                            $.pjax.reload('#pjax-container');
-
-                            resolve(data);
-                        }
-                    });
-
-                });
-            }
-        }).then(function(result){
-            var data = result.value;
-            if (typeof data === 'object') {
-                if (data.status) {
-                    swal(data.message, '', 'success');
-                } else {
-                    swal(data.message, '', 'error');
-                }
-            }
-        });
-    });
-
-    $('#moveModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var name = button.data('name');
-
-        var modal = $(this);
-        modal.find('[name=path]').val(name)
-        modal.find('[name=new]').val(name)
-    });
-
-    $('#urlModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var url = button.data('url');
-
-        $(this).find('input').val(url)
-    });
-
-    $('#file-move').on('submit', function (event) {
-
-        event.preventDefault();
-
-        var form = $(this);
-
-        var path = form.find('[name=path]').val();
-        var name = form.find('[name=new]').val();
-
-        $.ajax({
-            method: 'put',
-            url: '{{ $url['move'] }}',
-            data: {
-                path: path,
-                'new': name,
-                _token:LA.token,
-            },
-            success: function (data) {
-                $.pjax.reload('#pjax-container');
-
-                if (typeof data === 'object') {
-                    if (data.status) {
-                        toastr.success(data.message);
-                    } else {
-                        toastr.error(data.message);
-                    }
-                }
-            }
-        });
-
-        closeModal();
-    });
-
-    $('.file-upload').on('change', function () {
-        $('.file-upload-form').submit();
-    });
-
-    $('#new-folder').on('submit', function (event) {
-
-        event.preventDefault();
-
-        var formData = new FormData(this);
-
-        $.ajax({
-            method: 'POST',
-            url: '{{ $url['new-folder'] }}',
-            data: formData,
-            async: false,
-            success: function (data) {
-                $.pjax.reload('#pjax-container');
-
-                if (typeof data === 'object') {
-                    if (data.status) {
-                        toastr.success(data.message);
-                    } else {
-                        toastr.error(data.message);
-                    }
-                }
-            },
-            cache: false,
-            contentType: false,
-            processData: false
-        });
-
-        closeModal();
-    });
-
-    function closeModal() {
-        $("#moveModal").modal('toggle');
-        $('body').removeClass('modal-open');
-        $('.modal-backdrop').remove();
-    }
-
-    $('.media-reload').click(function () {
-        $.pjax.reload('#pjax-container');
-    });
-
-    $('.goto-url button').click(function () {
-        var path = $('.goto-url input').val();
-        $.pjax({container:'#pjax-container', url: '{{ $url['index'] }}?path=' + path });
-    });
-
-    $('.files-select-all').on('ifChanged', function(event) {
-        if (this.checked) {
-            $('.grid-row-checkbox').iCheck('check');
-        } else {
-            $('.grid-row-checkbox').iCheck('uncheck');
-        }
-    });
-
-    $('.file-select input').iCheck({checkboxClass:'icheckbox_minimal-blue'}).on('ifChanged', function () {
-        if (this.checked) {
-            $(this).closest('tr').css('background-color', '#ffffd5');
-        } else {
-            $(this).closest('tr').css('background-color', '');
-        }
-    });
-
-    $('.file-select-all input').iCheck({checkboxClass:'icheckbox_minimal-blue'}).on('ifChanged', function () {
-        if (this.checked) {
-            $('.file-select input').iCheck('check');
-        } else {
-            $('.file-select input').iCheck('uncheck');
-        }
-    });
-
-    $('.file-delete-multiple').click(function () {
-        var files = $(".file-select input:checked").map(function(){
-            return $(this).val();
-        }).toArray();
-
-        if (!files.length) {
-            return;
-        }
-
-        swal({
-            title: "{{ trans('admin.delete_confirm') }}",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: "{{ trans('admin.confirm') }}",
-            showLoaderOnConfirm: true,
-            closeOnConfirm: false,
-            cancelButtonText: "{{ trans('admin.cancel') }}",
-            preConfirm: function() {
-                return new Promise(function(resolve) {
-
-                    $.ajax({
-                        method: 'delete',
-                        url: '{{ $url['delete'] }}',
-                        data: {
-                            'files[]': files,
-                            _token:LA.token
-                        },
-                        success: function (data) {
-                            $.pjax.reload('#pjax-container');
-
-                            resolve(data);
-                        }
-                    });
-
-                });
-            }
-        }).then(function (result) {
-            var data = result.value;
-            if (typeof data === 'object') {
-                if (data.status) {
-                    swal(data.message, '', 'success');
-                } else {
-                    swal(data.message, '', 'error');
-                }
-            }
-        });
-    });
-
-    $('table>tbody>tr').mouseover(function () {
-        $(this).find('.btn-group').removeClass('hide');
-    }).mouseout(function () {
-        $(this).find('.btn-group').addClass('hide');
-    });
-
-});
-
+<script src="{{url("/vendor/laravel-admin-ext-media/angular.min.js")}}"></script>
+<script src="{{url("/vendor/laravel-admin-ext-media/media-app.js")}}"></script>
+<script>
+    var list= {!! json_encode($list) !!};
+</script>
+<script>
+    var url={!! json_encode($url) !!};
+    var nav={!! json_encode($nav) !!};
 </script>
 
-<div class="row">
+
+<div class="row" ng-app="mediaApp" ng-controller="mediaController" >
     <!-- /.col -->
     <div class="col-md-12">
         <div class="box box-primary">
@@ -276,25 +60,24 @@ $(function () {
 
                 <div class="mailbox-controls with-border">
                     <div class="btn-group">
-                        <a href="" type="button" class="btn btn-default btn media-reload" title="Refresh">
+                        <a href="" type="button" class="btn btn-default btn media-reload" ng-click="media_refresh()" title="Refresh">
                             <i class="fa fa-refresh"></i>
                         </a>
-                        <a type="button" class="btn btn-default btn file-delete-multiple" title="Delete">
+                        <a type="button" class="btn btn-default btn file-delete-multiple" ng-click="deleteSelected()" title="Delete">
                             <i class="fa fa-trash-o"></i>
                         </a>
                     </div>
                     <!-- /.btn-group -->
-                    <label class="btn btn-default btn"{{-- data-toggle="modal" data-target="#uploadModal"--}}>
+                    <label class="btn btn-default btn">
                         <i class="fa fa-upload"></i>&nbsp;&nbsp;{{ trans('admin.upload') }}
-                        <form action="{{ $url['upload'] }}" method="post" class="file-upload-form" enctype="multipart/form-data" pjax-container>
-                            <input type="file" name="files[]" class="hidden file-upload" multiple>
-                            <input type="hidden" name="dir" value="{{ $url['path'] }}" />
+                        <form   method="post" class="file-upload-form" enctype="multipart/form-data">
+                            <input type="file" ng-change="uploadfile(file)" select-ng-files ng-model="file" class="hidden file-upload" multiple>
                             {{ csrf_field() }}
                         </form>
                     </label>
 
                     <!-- /.btn-group -->
-                    <a class="btn btn-default btn" data-toggle="modal" data-target="#newFolderModal">
+                    <a class="btn btn-default btn" data-toggle="modal" ng-click="openModal('newFolderModal')">
                         <i class="fa fa-folder"></i>&nbsp;&nbsp;{{ trans('admin.new_folder') }}
                     </a>
 
@@ -305,10 +88,10 @@ $(function () {
 
                     {{--<form action="{{ $url['index'] }}" method="get" pjax-container>--}}
                     <div class="input-group input-group-sm pull-right goto-url" style="width: 250px;">
-                        <input type="text" name="path" class="form-control pull-right" value="{{ '/'.trim($url['path'], '/') }}">
+                        <input type="text" name="path" class="form-control pull-right" ng-model="path">
 
                         <div class="input-group-btn">
-                            <button type="submit" class="btn btn-default"><i class="fa fa-arrow-right"></i></button>
+                            <button ng-click="newDir(path)" class="btn btn-default"><i class="fa fa-arrow-right"></i></button>
                         </div>
                     </div>
                     {{--</form>--}}
@@ -318,64 +101,97 @@ $(function () {
                 <!-- /.mailbox-read-message -->
             </div>
             <!-- /.box-body -->
-            <div class="box-footer">
+            <div class="box-footer" ng-cloak>
                 <ol class="breadcrumb" style="margin-bottom: 10px;">
 
-                    <li><a href="{{ route('media-index') }}"><i class="fa fa-th-large"></i> </a></li>
-
-                    @foreach($nav as $item)
-                    <li><a href="{{ $item['url'] }}"> {{ $item['name'] }}</a></li>
-                    @endforeach
+                    <li><a ng-click="newDir('')"><i class="fa fa-th-large"></i> </a></li>
+                    <li ng-repeat="item in nav"><a ng-click="newDir(item.url)">@{{item.name}}</a></li>
                 </ol>
 
                 @if (!empty($list))
-                <table class="table table-hover">
-                    <tbody>
-                    <tr>
-                        <th width="40px;">
+                    <table class="table table-hover">
+                        <tbody>
+                        <tr>
+                            <th width="40px;">
                             <span class="file-select-all">
-                            <input type="checkbox" value=""/>
+                            {{--<input type="checkbox" ng-model="selectedAll" ng-init="selectedAll=false" value=""/>--}}
+                                <input type="checkbox" ng-click="toggleAll()" ng-init="selectedAll=false" value=""/>
                             </span>
-                        </th>
-                        <th>{{ trans('admin.name') }}</th>
-                        <th></th>
-                        <th width="200px;">{{ trans('admin.time') }}</th>
-                        <th width="100px;">{{ trans('admin.size') }}</th>
-                    </tr>
-                    @foreach($list as $item)
-                    <tr>
-                        <td style="padding-top: 15px;">
+                            </th>
+                            <th>{{ trans('admin.name') }}</th>
+                            <th></th>
+                            <th width="200px;">{{ trans('admin.time') }}</th>
+                            <th width="100px;">{{ trans('admin.size') }}</th>
+                        </tr>
+                        <tr ng-repeat="item in list | pageFilter:currentPage*pageSize | limitTo:pageSize as results" ng-mouseenter="item.btn_group=true" ng-mouseleave="item.btn_group=false">
+                            <td style="padding-top: 15px;">
                             <span class="file-select">
-                            <input type="checkbox" value="{{ $item['name'] }}"/>
+                            <input type="checkbox" ng-model="item.delete" ng-checked="item.delete" value="" ng-value="item.name"/>
                             </span>
-                        </td>
-                        <td>
-                            {!! $item['preview'] !!}
+                            </td>
+                            <td ng-if="!item.isDir">
+                                <div ng-bind-html="item.preview | to_trusted"></div>
+                                <a target="_blank" href="@{{item.link}}" class="file-name" title="@{{item.name}}">
+                                    @{{ item.icon }} @{{ basename(item.name) }}
+                                </a>
+                            </td>
+                            <td ng-if="item.isDir">
+                                <div ng-bind-html="item.preview | to_trusted"></div>
+                                <a  ng-click="newDir(item.name)"  class="file-name" title="@{{item.name}}">
+                                    @{{ item.icon }} @{{ basename(item.name) }}
+                                </a>
+                            </td>
 
-                            <a @if(!$item['isDir'])target="_blank"@endif href="{{ $item['link'] }}" class="file-name" title="{{ $item['name'] }}">
-                            {{ $item['icon'] }} {{ basename($item['name']) }}
-                            </a>
-                        </td>
 
-                        <td class="action-row">
-                            <div class="btn-group btn-group-xs hide">
-                                <a class="btn btn-default file-rename" data-toggle="modal" data-target="#moveModal" data-name="{{ $item['name'] }}"><i class="fa fa-edit"></i></a>
-                                <a class="btn btn-default file-delete" data-path="{{ $item['name'] }}"><i class="fa fa-trash"></i></a>
-                                @unless($item['isDir'])
-                                <a target="_blank" href="{{ $item['download'] }}" class="btn btn-default"><i class="fa fa-download"></i></a>
-                                @endunless
-                                <a class="btn btn-default" data-toggle="modal" data-target="#urlModal" data-url="{{ $item['url'] }}"><i class="fa fa-internet-explorer"></i></a>
-                            </div>
-
-                        </td>
-                        <td>{{ $item['time'] }}&nbsp;</td>
-                        <td>{{ $item['size'] }}&nbsp;</td>
-                    </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+                            <td class="action-row" >
+                                <div class="btn-group btn-group-xs" ng-if="!item.isDir" ng-init="item.btn_group=false" ng-show="item.btn_group">
+                                    <a class="btn btn-default file-rename" data-toggle="modal" data-target="#moveModal" data-name="@{{ item.name }}"><i class="fa fa-edit"></i></a>
+                                    <a class="btn btn-default file-delete" ng-click="deleteFile(item.name)"><i class="fa fa-trash"></i></a>
+                                    <a target="_blank" href="@{{ item.download }}" class="btn btn-default"><i class="fa fa-download"></i></a>
+                                    <a class="btn btn-default" data-toggle="modal" ng-click="getUrl(item.url)" ><i class="fa fa-internet-explorer"></i></a>
+                                </div>
+                            </td>
+                            <td>@{{ item.time }}&nbsp;</td>
+                            <td>@{{ item.size }}&nbsp;</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 @endif
-
+                <div class="pull-right" ng-cloak>
+                    <button class="btn btn-default btn" ng-click="currentPage=0">
+                        First
+                    </button>
+                    <button class="btn btn-default btn" ng-disabled="currentPage == 0" ng-click="currentPage=currentPage-1">
+                        Previous
+                    </button>
+                    <button class="btn btn-default btn" ng-show="currentPage-3>=0" ng-click="currentPage=currentPage-2">
+                        @{{currentPage-2}}
+                    </button>
+                    <button class="btn btn-default btn" ng-show="currentPage-2>=0" ng-click="currentPage=currentPage-2">
+                        @{{currentPage-1}}
+                    </button>
+                    <button class="btn btn-default btn" ng-show="currentPage-1>=0" ng-click="currentPage=currentPage-1">
+                        @{{currentPage}}
+                    </button>
+                    <button class="btn btn-default btn" ng-disabled="true">
+                        @{{currentPage+1}}
+                    </button>
+                    <button class="btn btn-default btn" ng-hide="currentPage+2>numberOfPages()" ng-click="currentPage=currentPage+1">
+                        @{{currentPage+2}}
+                    </button>
+                    <button class="btn btn-default btn" ng-hide="currentPage+3>numberOfPages()" ng-click="currentPage=currentPage+2">
+                        @{{currentPage+3}}
+                    </button>
+                    <button class="btn btn-default btn" ng-hide="currentPage+4>numberOfPages()" ng-click="currentPage=currentPage+2">
+                        @{{currentPage+4}}
+                    </button>
+                    <button class="btn btn-default btn" ng-disabled="currentPage >= list.length/pageSize - 1" ng-click="currentPage=currentPage+1">
+                        Next
+                    </button>
+                    <button class="btn btn-default btn" ng-disabled="numberOfPages()<1" ng-click="currentPage=numberOfPages()-1">
+                        Last
+                    </button>
+                </div>
             </div>
             <!-- /.box-footer -->
             <!-- /.box-footer -->
@@ -383,71 +199,71 @@ $(function () {
         <!-- /. box -->
     </div>
     <!-- /.col -->
-</div>
-
-<div class="modal fade" id="moveModal" tabindex="-1" role="dialog" aria-labelledby="moveModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="moveModalLabel">Rename & Move</h4>
-            </div>
-            <form id="file-move">
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="recipient-name" class="control-label">Path:</label>
-                    <input type="text" class="form-control" name="new" />
+    <div class="modal fade" id="moveModal" tabindex="-1" role="dialog" aria-labelledby="moveModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="moveModalLabel">Rename & Move</h4>
                 </div>
-                <input type="hidden" name="path"/>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-            </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="urlModal" tabindex="-1" role="dialog" aria-labelledby="urlModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="urlModalLabel">Url</h4>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <input type="text" class="form-control" />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                <form id="file-move">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="recipient-name" class="control-label">Path:</label>
+                            <input type="text" class="form-control" name="new" />
+                        </div>
+                        <input type="hidden" name="path"/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="newFolderModal" tabindex="-1" role="dialog" aria-labelledby="newFolderModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="newFolderModalLabel">New folder</h4>
-            </div>
-            <form id="new-folder">
+    <div class="modal fade" id="urlModal" tabindex="-1" role="dialog" aria-labelledby="urlModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="urlModalLabel">Url</h4>
+                </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <input type="text" class="form-control" name="name" />
+                        <input type="text" ng-value="url" class="form-control" />
                     </div>
-                    <input type="hidden" name="dir" value="{{ $url['path'] }}"/>
-                    {{ csrf_field() }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
                 </div>
-            </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="newFolderModal" tabindex="-1" role="dialog" aria-labelledby="newFolderModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="newFolderModalLabel">New folder</h4>
+                </div>
+                <form id="new-folder" ng-submit="submitNewFolder()">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="text" class="form-control" ng-model="folder_name" />
+                        </div>
+                        {{--<input type="hidden" name="dir" value="dir"/>--}}
+                        {{ csrf_field() }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
